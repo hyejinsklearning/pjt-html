@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>Mybnb.com (공유 숙소 서비스 따라하기)</title>
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
+    <script type="text/javascript">
+    $(document).ready(function(){
+         $("#header").load("header.html")
+    });
+
+    jQuery(document).ready(function(){
+        loadRooms();
+
+        $("#btnRooms").click(function() {
+            loadRooms();
+        });
+
+        $("#btnRoomAdd").click(function() {
+            openRoomAddView();
+        });
+
+    });
+
+    function loadRooms() {
+        $('#tblRooms tbody').empty();
+
+        $.ajax({
+            type: "GET",
+            contentType: "application/json",
+            dataType: 'json',
+            url: "/rooms",
+            success: function(result){
+                console.log(result);
+                //var totalcnt = result.page.totalElements;
+                var rooms = result._embedded.rooms;
+
+                if(rooms.length < 1 ){
+                    $('#tblRooms > tbody:last-child')
+                        .append($('<tr>').attr('style', 'text-align:center;')
+                            .append($('<td>').attr('colspan', '5').text('NO DATA'))
+                        );
+                }
+                else {
+                    for(var i=0; i<rooms.length; i++){
+                        var room = rooms[i];
+                        var roomhref = room._links.room.href;
+
+                        var tmp = roomhref.split("/");
+                        var roomId = tmp[tmp.length-1];
+
+                        $('#tblRooms > tbody:last-child')
+                            .append($('<tr>').attr('style', 'text-align:center;')
+                                .append($('<td>').text(roomId))
+                                .append($('<td>').text(room.name))
+                                .append($('<td>').text(room.price))
+                                .append($('<td>').text(room.address))
+                                .append($('<td>').text(room.host))
+                            );
+                    }
+                }
+            },
+            error: function (status) {
+                $('#tblRooms > tbody:last-child')
+                    .append($('<tr>').attr('style', 'text-align:center; color:red;')
+                        .append($('<td>').attr('colspan', '5').text('조회 실패'))
+                    );
+             }
+        });
+    }
+
+    function openRoomAddView() {
+        var url = "room.html";
+        window.open(url,"","width=500,height=350");
+    }
+    </script>
+
+</head>
+<body>
+<div id="header"></div>
+
+<h2>숙소관리</h2>
+<div style="width:100%; text-align:right;"><button id="btnRooms">새로고침</button>&nbsp;<button id="btnRoomAdd">등록</button></div>
+<table id="tblRooms" style="width: 100%; border:1px solid black; margin-top:5px;">
+    <thead>
+    <tr>
+        <th>ID</th>
+        <th>이름</th>
+        <th>가격</th>
+        <th>주소</th>
+        <th>호스트</th>
+    </tr>
+    </thead>
+    <tbody>
+    </tbody>
+</table>
+
+</body>
+</html>
+

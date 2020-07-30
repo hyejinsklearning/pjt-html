@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>Mybnb.com (공유 숙소 서비스 따라하기)</title>
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
+    <script type="text/javascript">
+    $(document).ready(function(){
+         $("#header").load("header.html")
+    });
+
+    jQuery(document).ready(function(){
+        loadMypages();
+
+        $("#btnMypagess").click(function() {
+            loadMypages();
+        });
+    });
+
+    function loadMypages() {
+        $('#tblMypagess tbody').empty();
+
+        $.ajax({
+            type: "GET",
+            contentType: "application/json",
+            dataType: 'json',
+            url: "/mypages",
+            success: function(result){
+                console.log(result);
+                //var totalcnt = result.page.totalElements;
+                var mypages = result._embedded.mypages;
+
+                if(mypages.length < 1 ){
+                    $('#tblMypages > tbody:last-child')
+                        .append($('<tr>').attr('style', 'text-align:center;')
+                            .append($('<td>').attr('colspan', '12').text('NO DATA'))
+                        );
+                }
+                else {
+                    for(var i=0; i<mypages.length; i++){
+                        var mypage = mypages[i];
+                        var mypagehref = mypage._links.mypage.href;
+
+                        var tmp = mypagehref.split("/");
+                        var mypageId = tmp[tmp.length-1];
+
+                        $('#tblMypages > tbody:last-child')
+                            .append($('<tr>').attr('style', 'text-align:center;')
+                                .append($('<td>').text(mypageId))
+                                .append($('<td>').text(mypage.status))
+                                .append($('<td>').text(mypage.score == null ? "-" : mypage.score))
+                                .append($('<td>').text(mypage.bookId))
+                                .append($('<td>').text(mypage.guest))
+                                .append($('<td>').text(mypage.usedate + ""))
+                                .append($('<td>').text(mypage.roomId))
+                                .append($('<td>').text(mypage.name + ""))
+                                .append($('<td>').text(mypage.price))
+                                .append($('<td>').text(mypage.address))
+                                .append($('<td>').text(mypage.host))
+<!--                                .append($('<td>').append($('<a>').attr('href', "javascript:openReviewAddView('"+mypage.status+"','"+mypage.bookId+"')").text('리뷰작성')))-->
+                                .append($('<td>').text(mypage.couponCode == null ? "-" : mypage.couponCode))
+                            );
+                    }
+                }
+            },
+            error: function (status) {
+                $('#tblMypages > tbody:last-child')
+                    .append($('<tr>').attr('style', 'text-align:center; color:red;')
+                        .append($('<td>').attr('colspan', '12').text('조회 실패'))
+                    );
+             }
+        });
+    }
+
+    function openReviewAddView(status, bookId) {
+        if(status != 'Booked') {
+            return;
+        }
+        var url = "review.html?"+bookId;
+        window.open(url,"","width=500,height=400");
+    }
+
+    </script>
+
+</head>
+<body>
+<div id="header"></div>
+
+<h2>마이페이지</h2>
+<div style="width:100%; text-align:right;"><button id="btnMypages">새로고침</button></div>
+<table id="tblMypages" style="width: 100%; border:1px solid black; margin-top:5px;">
+    <thead>
+    <tr>
+        <th>ID</th>
+        <th>상태</th>
+        <th>평점</th>
+        <th>예약 ID</th>
+        <th>예약자</th>
+        <th>예약일자</th>
+        <th>숙소 ID</th>
+        <th>숙소 이름</th>
+        <th>숙소 가격</th>
+        <th>숙소 주소</th>
+        <th>숙소 호스트</th>
+<!--        <th>리뷰작성하기</th>-->
+        <th>쿠폰</th>
+
+    </tr>
+    </thead>
+    <tbody>
+    </tbody>
+</table>
+
+</body>
+</html>
+
